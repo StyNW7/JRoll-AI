@@ -240,14 +240,45 @@ def recommend_anime(title, top_n=5, similarity_matrix=similarity, anime_df=anime
 
     # Hitung similarity dan ambil top N
     sim_scores = list(enumerate(similarity_matrix[idx]))
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:top_n+1]
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[:top_n]
     top_indices = [i[0] for i in sim_scores]
 
     # Ambil anime rekomendasi
     recommendations = anime_df.iloc[top_indices].copy()
     recommendations['similarity_score'] = [i[1] for i in sim_scores]
 
-    return recommendations[['Name', 'Score', 'Genres', 'Type', 'Episodes', 'similarity_score']]
+    results = []
+    for _, row in recommendations.iterrows():
+        # Extract year from 'Aired' column
+        aired = str(row.get('Aired', ''))
+        year = "Unknown"
+        match = re.search(r'\d{4}', aired)
+        if match:
+            year = match.group(0)
+
+        # Ambil genre list
+        genres_raw = row.get('Genres', '')
+        genres = [g.strip() for g in genres_raw.split(',')] if isinstance(genres_raw, str) else []
+
+        # Tentukan apakah anime ini baru
+        is_new = False
+        try:
+            is_new = int(year) >= 2022
+        except:
+            pass
+
+        results.append({
+            "title": row['Name'],
+            "image": row.get('Image URL', "/Images/Card/japan.png"),
+            "rating": str(row.get('Score', "N/A")),
+            "year": year,
+            "episodes": int(row['Episodes']) if pd.notnull(row['Episodes']) else 0,
+            "genres": row['Genres'].split(', ') if pd.notnull(row['Genres']) else [],
+            "isNew": '2024' in year or '2025' in year,
+            "similarity_score": float(row['similarity_score']) if 'similarity_score' in row else None
+        })
+
+    return results
 
 """ Item-Based Collaborative Filtering"""
 
@@ -352,41 +383,41 @@ def recommend_collaborative(user_favorites, top_n=5, anime_df=animes):
     return results
 
 
-def display_recommendations(recommendations, user_favorites=None):
+# def display_recommendations(recommendations, user_favorites=None):
 
-    if recommendations.empty:
-        return
+#     if recommendations.empty:
+#         return
 
-    print("\n========== ANIME RECOMMENDATIONS ==========\n")
+#     print("\n========== ANIME RECOMMENDATIONS ==========\n")
 
-    if user_favorites and len(user_favorites) > 0:
-        print("Based on your favorites:")
-        for i, fav in enumerate(user_favorites, 1):
-            print(f"  {i}. {fav}")
-        print("")
+#     if user_favorites and len(user_favorites) > 0:
+#         print("Based on your favorites:")
+#         for i, fav in enumerate(user_favorites, 1):
+#             print(f"  {i}. {fav}")
+#         print("")
 
 
-    for i, (_, row) in enumerate(recommendations.iterrows(), 1):
-        print(f"{i}. {row['Name']}")
-        print(f"   Genre: {row['Genres']}")
-        print(f"   Type: {row['Type']} | Episodes: {row['Episodes']} | Score: {row['Score']:.2f}")
-        if 'collab_score' in row:
-           print(f"   Collaborative Score: {row['collab_score']:.4f}")
-        elif 'similarity_score' in row:
-           print(f"   Similarity Score: {row['similarity_score']:.4f}")
-        print("-" * 50)
+#     for i, (_, row) in enumerate(recommendations.iterrows(), 1):
+#         print(f"{i}. {row['Name']}")
+#         print(f"   Genre: {row['Genres']}")
+#         print(f"   Type: {row['Type']} | Episodes: {row['Episodes']} | Score: {row['Score']:.2f}")
+#         if 'collab_score' in row:
+#            print(f"   Collaborative Score: {row['collab_score']:.4f}")
+#         elif 'similarity_score' in row:
+#            print(f"   Similarity Score: {row['similarity_score']:.4f}")
+#         print("-" * 50)
 
-"""TRY RECOMMENDER SYSTEM"""
+# """TRY RECOMMENDER SYSTEM"""
 
-CB_recommendations = recommend_anime("Naruto")
-display_recommendations(CB_recommendations)
+# CB_recommendations = recommend_anime("Naruto")
+# display_recommendations(CB_recommendations)
 
-user_favorites = ["Hunter x Hunter", "Naruto: Shippuuden"]
-try:
-    recommend = recommend_collaborative(user_favorites=user_favorites)
-    display_recommendations(recommend, user_favorites)
-except Exception as e:
-    print(f"Error during hybrid recommendation: {e}")
+# user_favorites = ["Hunter x Hunter", "Naruto: Shippuuden"]
+# try:
+#     recommend = recommend_collaborative(user_favorites=user_favorites)
+#     display_recommendations(recommend, user_favorites)
+# except Exception as e:
+#     print(f"Error during hybrid recommendation: {e}")
 
 # anime_names = ["One Piece", "Naruto: Shippuuden", "Naruto"]
 # with open('anime_names.pkl', 'wb') as f:
