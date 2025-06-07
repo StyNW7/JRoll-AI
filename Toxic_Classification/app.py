@@ -7,7 +7,7 @@ import torch.nn.functional as F
 app = Flask(__name__)
 CORS(app)
 
-model_path = "./toxic-xlm-roberta-final"
+model_path = "toxic-xlm-roberta-final"
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForSequenceClassification.from_pretrained(model_path)
 model.eval()
