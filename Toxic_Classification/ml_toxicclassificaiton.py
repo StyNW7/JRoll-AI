@@ -77,6 +77,23 @@ eval_dataset_tokenized = eval_dataset_raw.map(preprocess_function, batched=True)
 train_dataset_tokenized.set_format("torch")
 eval_dataset_tokenized.set_format("torch")
 
+# **CLASS WEIGHTS**
+labels_for_weights = df['labels'].values
+class_counts = np.bincount(labels_for_weights)
+
+if len(class_counts) < NUM_LABELS:
+    full_class_counts = np.zeros(NUM_LABELS, dtype=int)
+    full_class_counts[:len(class_counts)] = class_counts
+    class_counts = full_class_counts
+    class_counts[class_counts == 0] = 1 # Hindari pembagian dengan nol, namun perlu ditinjau jika ada kelas yang benar-benar hilang
+
+if np.any(class_counts == 0):
+     print("Peringatan: Ada kelas dengan jumlah sampel 0. Bobot untuk kelas ini mungkin tidak optimal.")
+
+class_weights_values = sum(class_counts) / class_counts # Bobot invers proporsional
+class_weights = torch.tensor(class_weights_values, dtype=torch.float)
+print(f"Bobot kelas yang dihitung: {class_weights}")
+
 # **MODEL**
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, num_labels=NUM_LABELS)
 
