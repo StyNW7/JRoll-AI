@@ -1,2 +1,4 @@
 Dataset/
 __pycache__/
+toxic-model-xlm-roberta/
+dataset_anime/

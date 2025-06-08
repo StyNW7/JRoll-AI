@@ -7,7 +7,7 @@ import torch.nn.functional as F
 app = Flask(__name__)
 CORS(app)
 
-model_path = "toxic-xlm-roberta-final"
+model_path = "./toxic-model-xlm-roberta/checkpoint-375" # Please change this depends on your model
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForSequenceClassification.from_pretrained(model_path)
 model.eval()
@@ -44,4 +44,4 @@ def predict():
     return jsonify(results)
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)
