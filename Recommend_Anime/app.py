@@ -31,5 +31,13 @@ def recommend():
     print("📤 Sending back:", rekomendasi)
     return jsonify({"recommendations": rekomendasi})
 
+
+@app.route('/recommend_anime', methods=['POST'])
+def recommend_anime_api():
+    data = request.get_json()
+    title = data.get("title", "")
+    results = recommend_anime(title, top_n=12)
+    return jsonify({"recommendations": results})
+
 if __name__ == "__main__":
     app.run(debug=True)
