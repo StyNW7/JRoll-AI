@@ -158,3 +158,8 @@ trainer = CustomTrainer(
 )
 
 trainer.train()
+
+# Save the Best Model
+trainer.save_model(FINAL_MODEL_SAVE_PATH)
+tokenizer.save_pretrained(FINAL_MODEL_SAVE_PATH)
+
