@@ -41,8 +41,8 @@ except LookupError:
 warnings.filterwarnings('ignore')
 
 # Load dataset
-df = pd.read_csv('./dataset_anime/anime-dataset-2023.csv')
-ratings = pd.read_csv('./dataset_anime/users-score-2023.csv')
+df = pd.read_csv('Recommend_Anime/dataset_anime/anime-dataset-2023.csv')
+ratings = pd.read_csv('Recommend_Anime/dataset_anime/users-score-2023.csv')
 
 # print(f"anime dataset: {df.shape} ")
 # print(f"user score dataset: {ratings.shape}")
